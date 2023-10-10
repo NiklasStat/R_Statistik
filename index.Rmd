@@ -1,0 +1,6 @@
+---
+title: "Main Title"
+output: html_document
+---
+
+Das wird auf der main page angezeigt.

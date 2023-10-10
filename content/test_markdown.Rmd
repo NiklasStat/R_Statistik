@@ -1,0 +1,132 @@
+---
+title: "My Website test"
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo    = FALSE,
+  message = FALSE,
+  warning = FALSE
+)
+```
+
+
+
+# Grundlagen 
+
+Hier in diesem Abschnitt findest du die grundlegenden Konzepte von R. Wir gehen hier nicht ins Detail und auch der Bezug zur Statistik ist überschaubar. Das folgt in den anderen Abschnitten. Lerne erst einmal **R** und die Programmierung kennen.
+
+```{r}
+library(knitr)
+library(kableExtra)
+kable(iris)|>
+  kable_styling(latex_options = "striped")|>
+  scroll_box(width = "100%", height = "200px")
+```
+
+```{r}
+df <- data.frame(Operator = c("`&`","`|`", "`xor`", "`!`", "`any`", "`all`"), 
+                 Syntax = c("`cond1 & cond2`", "`cond1 | cond2`", 
+                          "`xor(cond1, cond2)`", "`!cond1`",
+                          "`any(cond1, cond2, ...)`",
+                          "`all(cond1, cond2, ...)`"),
+                 Test = c("Sind sowohl cond1 als auch cond2 wahr?",
+                          "Ist mind. eins von cond1, cond2 wahr?",
+                          "Ist genau eins von cond1, cond2 wahr?",
+                          "Ist cond1 falsch? Umkehrung von logical test",
+                          "Sind irgendwelche der Conditions wahr?",
+                          "Sind alle der Conditions wahr? Gleich b?"))
+kable(df)|>
+  kable_styling(latex_options = "striped")|>
+  scroll_box(width = "100%", height = "200px")
+```
+
+## gr
+
+```{r}
+library(dplyr)
+library(nycflights13)
+flights |> 
+  filter(arr_delay > 0) |> 
+  group_by(year, month, day) |> 
+  summarize(
+    behind = mean(arr_delay),
+    n = n(),
+    .groups = "drop"
+  )
+```
+
+
+# Shiny
+
+```{r}
+library(correlationfunnel)
+library(plotly)
+library(tidyquant)
+library(tidyverse)
+library(shiny)
+library(ggplot2)
+```
+
+```{r}
+inputPanel(
+  shiny::selectInput("chart_type", label = "Chart Type",
+                     choices = c("Customer-Level", "Aggregated"))
+)
+```
+
+```{r}
+output$p1 <- renderPlotly({
+  
+  if (input$chart_type == "Aggregated") {
+    g <- customer_churn_tbl %>%
+      select(Contract, Churn) %>%
+      count(Contract, Churn) %>%
+      group_by(Contract) %>%
+      mutate(prop = n/sum(n)) %>%
+      ungroup() %>%
+      mutate(Contract = as_factor(Contract) %>% fct_reorder(prop) %>% fct_rev()) %>%
+      filter(Churn == "Yes") %>%
+      ggplot(aes(prop, Contract)) + 
+      geom_col(aes(text = str_glue("Churn %:
+                                   {scales::percent(prop)}")),
+               fill = palette_light()[2]) +
+      scale_x_continuous(labels = scales::percent_format()) +
+      theme_tq()
+  } else {
+    g <- customer_churn_tbl %>%
+      mutate(value = ifelse(Churn =="Yes", 1, 0)) %>%
+      mutate(Contract = factor(Contract, levels = c("Month-to-month", "One year", "Two year"))) %>%
+      ggplot(aes(value, Contract, color = Churn)) +
+      geom_jitter((aes(text = str_glue({
+        "Customer ID: {customerID}
+        Contract: {Contract}
+        Tenure: {tenure}
+        Payment Method {PaymentMethod}"
+      }))),
+               alpha = 0.5) +
+      scale_color_tq() + 
+      scale_x_continuous(breaks = c(0,1)) +
+      theme_tq() +
+      labs(x = "Churn Numeric (Yes = 1, No = 0)")
+  }
+    ggplotly(g)
+})
+
+plotlyOutput("p1", height = "600px")
+```
+st
+# Tetst
+
+```{r}
+subset_flights <- function(rows, cols) {
+  flights |> 
+    filter({{rows}}) |> 
+    select(time_hour, carrier, flight,{{cols}})
+}
+subset_flights(TRUE, "year")
+subset_flights(nrow(flights) <= 10, 1)
+```
+
+

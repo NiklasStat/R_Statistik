@@ -1,0 +1,18 @@
+---
+title: "Main page"
+output: 
+   html_document:
+     df_print: paged
+ 
+---
+
+this is where you link to the other files which are in a folder in the 
+main directory. make sure the name of the folder does not have an underscore
+in it. you also need to go knit those files within the folder first. 
+and, if you update the file, **you need to reknit it!**
+
+* [File 1](content/index_4.html)
+* [File 2](content/index_3.html)
+* [File 3](content/index_2.html)
+* [File 4](content/bb1.html)
+* [File 5](content/test_markdown.html)
